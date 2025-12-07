@@ -290,7 +290,13 @@ const CreateEvent = ({ onEventCreated, refreshProfilesTrigger }) => {
             type="datetime-local"
             id="startDateTime"
             value={startDateTime}
-            onChange={(e) => setStartDateTime(e.target.value)}
+            onChange={(e) => {
+              setStartDateTime(e.target.value);
+              // If end date is before new start date, clear it
+              if (e.target.value && endDateTime && new Date(e.target.value) >= new Date(endDateTime)) {
+                setEndDateTime('');
+              }
+            }}
             required
           />
         </div>
@@ -301,9 +307,24 @@ const CreateEvent = ({ onEventCreated, refreshProfilesTrigger }) => {
             type="datetime-local"
             id="endDateTime"
             value={endDateTime}
-            onChange={(e) => setEndDateTime(e.target.value)}
+            onChange={(e) => {
+              const selectedEndDate = e.target.value;
+              // Validate that end date is after start date
+              if (startDateTime && selectedEndDate && new Date(selectedEndDate) <= new Date(startDateTime)) {
+                setError('End date/time must be after start date/time');
+                return;
+              }
+              setError(null);
+              setEndDateTime(selectedEndDate);
+            }}
+            min={startDateTime || ''}
             required
           />
+          {!startDateTime && (
+            <small className="hint" style={{ marginTop: '0.25rem', display: 'block', fontSize: '0.8rem', color: '#718096' }}>
+              Please select start date first
+            </small>
+          )}
         </div>
       </div>
 
